@@ -1,39 +1,18 @@
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.estimators import ParameterEstimator
 from pgmpy.inference import VariableElimination
-
 import pandas as pd
-
-# Updated data for Loan Default Risk Prediction
-data = pd.DataFrame(data = {
-    'IncomeStability':['Stable','Stable','Unstable','Unstable','Stable','Unstable','Stable','Unstable'],
-    'CreditHistory':['Good','Bad','Good','Bad','Good','Good','Bad','Bad'],
-    'EmploymentType':['Salaried','Salaried','Self-employed','Unemployed','Salaried','Self-employed','Unemployed','Salaried'],
-    'DefaultRisk':['Low','High','High','High','Low','High','High','High']
-})
-
-# Define the Bayesian Network structure for loan default risk
-# Assuming IncomeStability, CreditHistory, and EmploymentType influence DefaultRisk
-model = DiscreteBayesianNetwork([
-    ('IncomeStability','DefaultRisk'),
-    ('CreditHistory','DefaultRisk'),
-    ('EmploymentType','DefaultRisk')
-])
-
-# Fit the model to the data to learn the Conditional Probability Distributions (CPDs)
+# Sample data
+data = pd.DataFrame(data={'Rain': ['No', 'No', 'Yes', 'Yes', 'No', 'Yes', 'Yes', 'No'],
+'TrafficJam': ['Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'No', 'No'],
+'ArriveLate': ['Yes', 'No', 'Yes', 'No', 'No', 'Yes', 'Yes', 'No']})
+# Define the Bayesian network structure
+model = DiscreteBayesianNetwork([('Rain', 'TrafficJam'), ('TrafficJam', 'ArriveLate')])
+# Fit the model to the data using Maximum Likelihood Estimation
 model.fit(data)
-
-print("Conditional Probability Distributions (CPDs):")
+# Print conditional probability distributions
 print(model.get_cpds())
-
-# Perform inference using Variable Elimination
+# Perform inference
 inference = VariableElimination(model)
-
-# Query: Predict 'DefaultRisk' given 'IncomeStability' is 'Unstable' and 'CreditHistory' is 'Bad'
-query_result = inference.query(
-    variables=['DefaultRisk'],
-    evidence={'IncomeStability':'Unstable', 'CreditHistory':'Bad'}
-)
-
-print("\nProbability of DefaultRisk given Unstable Income and Bad Credit History:")
+query_result = inference.query(variables=['ArriveLate'], evidence={'Rain': 'Yes'})
 print(query_result)
